@@ -30,10 +30,11 @@ runHelp = runCommand "hledger-ui --help | less" >>= waitForProcess
 
 uiShowClearedStatus mc =
  case mc of
-   Just Cleared   -> ["cleared"]
-   Just Pending   -> ["pending"]
-   Just Uncleared -> ["uncleared"]
-   Nothing        -> []
+   Just (Status (Just Cleared))       -> ["cleared"]
+   Just (Status (Just Pending))       -> ["pending"]
+   Just (Not (Status (Just Cleared))) -> ["uncleared"]
+   Just (Status Nothing)              -> ["no status"]
+   _                                  -> []
 
 -- | Draw the help dialog, called when help mode is active.
 helpDialog :: Widget Name
@@ -79,6 +80,7 @@ helpDialog =
                   ,renderKey ("/", "set a filter query")
                   ,renderKey ("C", "toggle cleared/all")
                   ,renderKey ("U", "toggle uncleared/all")
+                  ,renderKey ("P", "toggle pending/all")
                   ,renderKey ("R", "toggle real/all")
                   ,renderKey ("Z", "toggle nonzero/all")
                   ,renderKey ("DEL/BS", "remove filters")

@@ -108,7 +108,7 @@ OPTIONS
               include only pending postings/txns
 
        -U --uncleared
-              include only uncleared (and pending) postings/txns
+              include only non-cleared postings/txns
 
        -R --real
               include only non-virtual postings
@@ -228,7 +228,8 @@ SCREENS
 
        C toggles cleared mode, in which uncleared  transactions  and  postings
        are  not  shown.   U  toggles  uncleared  mode, in which only uncleared
-       transactions/postings are shown.
+       transactions/postings are shown.  P toggles pending mode, in which only
+       pending transactions/postings are shown.
 
        R toggles real mode, in which virtual postings are ignored.
 
@@ -267,7 +268,8 @@ SCREENS
 
        C toggles cleared mode, in which uncleared  transactions  and  postings
        are  not  shown.   U  toggles  uncleared  mode, in which only uncleared
-       transactions/postings are shown.
+       transactions/postings are shown.  P toggles pending mode, in which only
+       pending transactions/postings are shown.
 
        R toggles real mode, in which virtual postings are ignored.
 

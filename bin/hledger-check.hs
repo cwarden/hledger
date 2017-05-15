@@ -230,7 +230,7 @@ fixupJournal opts j = do
     today <- H.getCurrentDay
     let j' = (if cleared   opts then H.filterJournalTransactions (H.Status H.Cleared)   else id)
            . (if pending   opts then H.filterJournalTransactions (H.Status H.Pending)   else id)
-           . (if uncleared opts then H.filterJournalTransactions (H.Status H.Uncleared) else id)
+           . (if uncleared opts then H.filterJournalTransactions (H.Status H.NoStatus) else id)
            . (if real      opts then H.filterJournalTransactions (H.Real   True)        else id)
            $ H.journalApplyAliases (aliases opts) j
     let starting = case begin opts of

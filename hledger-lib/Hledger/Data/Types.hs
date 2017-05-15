@@ -180,15 +180,15 @@ type TagName = Text
 type TagValue = Text
 type Tag = (TagName, TagValue)  -- ^ A tag name and (possibly empty) value.
 
-data ClearedStatus = Uncleared | Pending | Cleared
+data ClearedStatus = Pending | Cleared | NoStatus
   deriving (Eq,Ord,Typeable,Data,Generic)
 
 instance NFData ClearedStatus
 
 instance Show ClearedStatus where -- custom show.. bad idea.. don't do it..
-  show Uncleared = ""
-  show Pending   = "!"
-  show Cleared   = "*"
+  show NoStatus = ""
+  show Pending  = "!"
+  show Cleared  = "*"
 
 data Posting = Posting {
       pdate             :: Maybe Day,         -- ^ this posting's date, if different from the transaction's

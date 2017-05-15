@@ -627,7 +627,7 @@ transactionFromCsvRecord sourcepos rules record = t
       ]
     status      =
       case mfieldtemplate "status" of
-        Nothing  -> Uncleared
+        Nothing  -> NoStatus
         Just str -> either statuserror id .
                     runParser (statusp <* eof) "" .
                     T.pack $ render str

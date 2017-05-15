@@ -112,7 +112,7 @@ the data.
      include only pending postings/txns
 '-U --uncleared'
 
-     include only uncleared (and pending) postings/txns
+     include only non-cleared postings/txns
 '-R --real'
 
      include only non-virtual postings
@@ -357,17 +357,17 @@ Tag Table:
 Node: Top73
 Node: OPTIONS825
 Ref: #options924
-Node: KEYS3650
-Ref: #keys3747
-Node: SCREENS6335
-Ref: #screens6422
-Node: Accounts screen6512
-Ref: #accounts-screen6642
-Node: Register screen8691
-Ref: #register-screen8848
-Node: Transaction screen10737
-Ref: #transaction-screen10897
-Node: Error screen11767
-Ref: #error-screen11891
+Node: KEYS3638
+Ref: #keys3735
+Node: SCREENS6323
+Ref: #screens6410
+Node: Accounts screen6500
+Ref: #accounts-screen6630
+Node: Register screen8679
+Ref: #register-screen8836
+Node: Transaction screen10725
+Ref: #transaction-screen10885
+Node: Error screen11755
+Ref: #error-screen11879
 
 End Tag Table

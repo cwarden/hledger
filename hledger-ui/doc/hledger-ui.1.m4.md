@@ -208,6 +208,7 @@ As on the accounts screen, this can be toggled with `F`.
 not shown. `U` toggles uncleared mode, in which only uncleared
 transactions/postings are shown.
 
+
 `R` toggles real mode, in which [virtual postings](/journal.html#virtual-postings) are ignored.
 
 `Z` toggles nonzero mode, in which only transactions posting a nonzero

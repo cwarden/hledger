@@ -188,17 +188,16 @@ instance Show ClearedStatus where -- custom show.. bad idea.. don't do it..
 
 instance NFData ClearedStatus
 
-data ClearedStatusFilter = PendingFilter | ClearedFilter | UnclearedFilter | NotPendingFilter | NoStatusFilter
+data ClearedStatusFilter = Filter ClearedStatus | NoStatus | IsNot ClearedStatusFilter
   deriving (Eq,Typeable,Data,Generic)
 
 instance NFData ClearedStatusFilter
 
 instance Show ClearedStatusFilter where -- custom show.. bad idea.. don't do it..
-  show UnclearedFilter  = "not *"
-  show NotPendingFilter = "not !"
-  show PendingFilter    = "!"
-  show ClearedFilter    = "*"
-  show NoStatusFilter   = "<none>"
+  show (Filter Pending)    = "!"
+  show (Filter Cleared)    = "*"
+  show NoStatus   = "<none>"
+  show (IsNot a) = "not " ++ show a
 
 data Posting = Posting {
       pdate             :: Maybe Day,         -- ^ this posting's date, if different from the transaction's

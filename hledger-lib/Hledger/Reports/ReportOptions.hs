@@ -268,10 +268,10 @@ clearedStatusFromRawOpts :: RawOpts -> Maybe ClearedStatusFilter
 clearedStatusFromRawOpts = lastMay . catMaybes . map clearedstatusfromrawopt
   where
     clearedstatusfromrawopt (n,_)
-      | n == "cleared"    = Just ClearedFilter
-      | n == "pending"    = Just PendingFilter
-      | n == "uncleared"  = Just UnclearedFilter
-      | n == "notpending" = Just NotPendingFilter
+      | n == "cleared"    = Just (Filter Cleared)
+      | n == "pending"    = Just (Filter Pending)
+      | n == "uncleared"  = Just (IsNot (Filter Cleared))
+      | n == "notpending" = Just (IsNot (Filter Pending))
       | otherwise         = Nothing
 
 type DisplayExp = String

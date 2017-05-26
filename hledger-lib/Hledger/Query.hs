@@ -268,7 +268,7 @@ parseQueryTerm d (T.stripPrefix "date:" -> Just s) =
                                     Right (_,span) -> Left $ Date span
 parseQueryTerm _ (T.stripPrefix "status:" -> Just s) =
         case parseStatus s of Left e   -> error' $ "\"status:"++T.unpack s++"\" gave a parse error: " ++ e
-                              Right st -> Left $ Status st
+                              Right st -> Left $ st
 parseQueryTerm _ (T.stripPrefix "real:" -> Just s) = Left $ Real $ parseBool s || T.null s
 parseQueryTerm _ (T.stripPrefix "amt:" -> Just s) = Left $ Amt ord q where (ord, q) = parseAmountQueryTerm s
 parseQueryTerm _ (T.stripPrefix "empty:" -> Just s) = Left $ Empty $ parseBool s
@@ -291,7 +291,7 @@ tests_parseQueryTerm = [
     "status:1" `gives` (Left $ Status (Filter Cleared))
     "status:*" `gives` (Left $ Status (Filter Cleared))
     "status:!" `gives` (Left $ Status (Filter Pending))
-    "status:0" `gives` (Left $ Status (IsNot (Filter Cleared)))
+    "status:0" `gives` (Left $ Not (Status (Filter Cleared)))
     "status:" `gives` (Left $ Status NoStatus)
     "real:1" `gives` (Left $ Real True)
     "date:2008" `gives` (Left $ Date $ DateSpan (Just $ parsedate "2008/01/01") (Just $ parsedate "2009/01/01"))
@@ -362,11 +362,11 @@ parseTag s | "=" `T.isInfixOf` s = (T.unpack n, Just $ tail $ T.unpack v)
            where (n,v) = T.break (=='=') s
 
 -- | Parse the value part of a "status:" query, or return an error.
-parseStatus :: T.Text -> Either String ClearedStatusFilter
-parseStatus s | s `elem` ["*","1"] = Right (Filter Cleared)
-              | s `elem` ["!"]     = Right (Filter Pending)
-              | s `elem` ["0"]     = Right (IsNot $ Filter Cleared)
-              | s `elem` [""]      = Right NoStatus
+parseStatus :: T.Text -> Either String Query
+parseStatus s | s `elem` ["*","1"] = Right $ Status (Filter Cleared)
+              | s `elem` ["!"]     = Right $ Status (Filter Pending)
+              | s `elem` ["0"]     = Right $ Not $ Status (Filter Cleared)
+              | s `elem` [""]      = Right $ Status NoStatus
               | otherwise          = Left $ "could not parse "++show s++" as a status (should be *, ! or empty)"
 
 -- | Parse the boolean value part of a "status:" query. "1" means true,
@@ -674,8 +674,6 @@ matchesPosting (Acct r) p = matchesPosting p || matchesPosting (originalPosting 
     where matchesPosting p = regexMatchesCI r $ T.unpack $ paccount p -- XXX pack
 matchesPosting (Date span) p = span `spanContainsDate` postingDate p
 matchesPosting (Date2 span) p = span `spanContainsDate` postingDate2 p
-matchesPosting (Status (IsNot (Filter Cleared))) p = postingStatus p /= Just Cleared
-matchesPosting (Status (IsNot (Filter Pending))) p = postingStatus p /= Just Pending
 matchesPosting (Status (Filter Cleared)) p = postingStatus p == Just Cleared
 matchesPosting (Status (Filter Pending)) p = postingStatus p == Just Pending
 matchesPosting (Status NoStatus) p = postingStatus p == Nothing
@@ -694,20 +692,20 @@ matchesPosting (Tag n v) p = not $ null $ matchedTags n v $ postingAllTags p
 tests_matchesPosting = [
    "matchesPosting" ~: do
     -- matching posting status..
-    assertBool "positive match on cleared posting status"  $
+    assertBool "positive match on cleared posting status" $
                    (Status (Filter Cleared))  `matchesPosting` nullposting{pstatus=Just Cleared}
-    assertBool "negative match on cleared posting status"  $
+    assertBool "negative match on cleared posting status" $
                not $ (Not $ Status (Filter Cleared))  `matchesPosting` nullposting{pstatus=Just Cleared}
     assertBool "not-pending matches cleared" $
-                   (Status (IsNot (Filter Cleared))) `matchesPosting` nullposting{pstatus=Just Cleared}
-    assertBool "not-pending matches uncleared" $
-                   (Status (IsNot (Filter Pending))) `matchesPosting` nullposting{pstatus=Nothing}
+                   (Not $ Status (Filter Pending)) `matchesPosting` nullposting{pstatus=Just Cleared}
+    assertBool "not-pending matches no status" $
+                   (Not $ (Status (Filter Pending))) `matchesPosting` nullposting{pstatus=Nothing}
     assertBool "not-pending does not match pending" $
-               not $ (Status (IsNot (Filter Pending))) `matchesPosting` nullposting{pstatus=Just Pending}
-    assertBool "positive match on uncleared posting status" $
-                   (Status (IsNot (Filter Cleared))) `matchesPosting` nullposting{pstatus=Nothing}
+               not $ (Not $ Status (Filter Pending)) `matchesPosting` nullposting{pstatus=Just Pending}
+    assertBool "positive match on uncleared posting" $
+                   (Not $ Status (Filter Cleared)) `matchesPosting` nullposting{pstatus=Nothing}
     assertBool "negative match on uncleared posting status" $
-               not $ (Not $ Status (IsNot (Filter Cleared))) `matchesPosting` nullposting{pstatus=Nothing}
+               not $ (Not $ Status (Filter Cleared)) `matchesPosting` nullposting{pstatus=Just Cleared}
     assertBool "positive match on true posting status acquired from transaction" $
                    (Status (Filter Cleared)) `matchesPosting` nullposting{pstatus=Nothing,ptransaction=Just nulltransaction{tstatus=Just Cleared}}
     assertBool "real:1 on real posting" $ (Real True) `matchesPosting` nullposting{ptype=RegularPosting}
@@ -741,8 +739,6 @@ matchesTransaction (Desc r) t = regexMatchesCI r $ T.unpack $ tdescription t
 matchesTransaction q@(Acct _) t = any (q `matchesPosting`) $ tpostings t
 matchesTransaction (Date span) t = spanContainsDate span $ tdate t
 matchesTransaction (Date2 span) t = spanContainsDate span $ transactionDate2 t
-matchesTransaction (Status (IsNot (Filter Cleared))) t = tstatus t /= Just Cleared
-matchesTransaction (Status (IsNot (Filter Pending))) t = tstatus t /= Just Pending
 matchesTransaction (Status (Filter Cleared)) t = tstatus t == Just Cleared
 matchesTransaction (Status (Filter Pending)) t = tstatus t == Just Pending
 matchesTransaction (Status NoStatus) t = tstatus t == Nothing

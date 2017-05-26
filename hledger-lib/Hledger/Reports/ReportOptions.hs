@@ -73,7 +73,7 @@ instance Default AccountListMode where def = ALDefault
 data ReportOpts = ReportOpts {
      period_         :: Period
     ,interval_       :: Interval
-    ,clearedstatus_  :: Maybe ClearedStatusFilter
+    ,clearedstatus_  :: Maybe Query
     ,cost_           :: Bool
     ,depth_          :: Maybe Int
     ,display_        :: Maybe DisplayExp
@@ -264,14 +264,14 @@ intervalFromRawOpts = lastDef NoInterval . catMaybes . map intervalfromrawopt
 
 -- | Get the cleared status, if any, specified by the last of -C/--cleared,
 -- --pending, -U/--uncleared, -X/--not-pending options.
-clearedStatusFromRawOpts :: RawOpts -> Maybe ClearedStatusFilter
+clearedStatusFromRawOpts :: RawOpts -> Maybe Query
 clearedStatusFromRawOpts = lastMay . catMaybes . map clearedstatusfromrawopt
   where
     clearedstatusfromrawopt (n,_)
-      | n == "cleared"    = Just (Filter Cleared)
-      | n == "pending"    = Just (Filter Pending)
-      | n == "uncleared"  = Just (IsNot (Filter Cleared))
-      | n == "notpending" = Just (IsNot (Filter Pending))
+      | n == "cleared"    = Just $ Status (Filter Cleared)
+      | n == "pending"    = Just $ Status (Filter Pending)
+      | n == "uncleared"  = Just $ Not $ Status (Filter Cleared)
+      | n == "notpending" = Just $ Not $ Status (Filter Pending)
       | otherwise         = Nothing
 
 type DisplayExp = String
@@ -320,7 +320,7 @@ queryFromOpts d ReportOpts{..} = simplifyQuery $ And $ [flagsq, argsq]
               [(if date2_ then Date2 else Date) $ periodAsDateSpan period_]
               ++ (if real_ then [Real True] else [])
               ++ (if empty_ then [Empty True] else []) -- ?
-              ++ (maybe [] ((:[]) . Status) clearedstatus_)
+              ++ (maybe [] (:[]) clearedstatus_)
               ++ (maybe [] ((:[]) . Depth) depth_)
     argsq = fst $ parseQuery d (T.pack query_)
 
@@ -332,7 +332,7 @@ queryFromOptsOnly _d ReportOpts{..} = simplifyQuery flagsq
               [(if date2_ then Date2 else Date) $ periodAsDateSpan period_]
               ++ (if real_ then [Real True] else [])
               ++ (if empty_ then [Empty True] else []) -- ?
-              ++ (maybe [] ((:[]) . Status) clearedstatus_)
+              ++ (maybe [] (:[]) clearedstatus_)
               ++ (maybe [] ((:[]) . Depth) depth_)
 
 tests_queryFromOpts :: [Test]

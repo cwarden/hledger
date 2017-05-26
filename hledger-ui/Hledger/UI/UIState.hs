@@ -22,32 +22,32 @@ toggleCleared :: UIState -> UIState
 toggleCleared ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
   ui{aopts=uopts{cliopts_=copts{reportopts_=toggleCleared ropts}}}
   where
-    toggleCleared ropts@ReportOpts{clearedstatus_=Just ClearedFilter} = ropts{clearedstatus_=Nothing}
-    toggleCleared ropts = ropts{clearedstatus_=Just ClearedFilter}
+    toggleCleared ropts@ReportOpts{clearedstatus_=Just (Status (Filter Cleared))} = ropts{clearedstatus_=Nothing}
+    toggleCleared ropts = ropts{clearedstatus_=Just $ Status (Filter Cleared)}
 
 -- | Toggle between showing only pending items or all items.
 togglePending :: UIState -> UIState
 togglePending ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
   ui{aopts=uopts{cliopts_=copts{reportopts_=togglePending ropts}}}
   where
-    togglePending ropts@ReportOpts{clearedstatus_=Just PendingFilter} = ropts{clearedstatus_=Nothing}
-    togglePending ropts = ropts{clearedstatus_=Just PendingFilter}
+    togglePending ropts@ReportOpts{clearedstatus_=Just (Status (Filter Pending))} = ropts{clearedstatus_=Nothing}
+    togglePending ropts = ropts{clearedstatus_=Just $ Status (Filter Pending)}
 
 -- | Toggle between showing only uncleared items or all items.
 toggleUncleared :: UIState -> UIState
 toggleUncleared ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
   ui{aopts=uopts{cliopts_=copts{reportopts_=toggleUncleared ropts}}}
   where
-    toggleUncleared ropts@ReportOpts{clearedstatus_=Just UnclearedFilter} = ropts{clearedstatus_=Nothing}
-    toggleUncleared ropts = ropts{clearedstatus_=Just UnclearedFilter}
+    toggleUncleared ropts@ReportOpts{clearedstatus_=Just (Not (Status (Filter Cleared)))} = ropts{clearedstatus_=Nothing}
+    toggleUncleared ropts = ropts{clearedstatus_=Just $ Not $ Status (Filter Cleared)}
 
 -- | Toggle between showing only non-pending items or all items.
 toggleNotPending :: UIState -> UIState
 toggleNotPending ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
   ui{aopts=uopts{cliopts_=copts{reportopts_=toggleNotPending ropts}}}
   where
-    toggleNotPending ropts@ReportOpts{clearedstatus_=Just NotPendingFilter} = ropts{clearedstatus_=Nothing}
-    toggleNotPending ropts = ropts{clearedstatus_=Just NotPendingFilter}
+    toggleNotPending ropts@ReportOpts{clearedstatus_=Just (Not (Status (Filter Pending)))} = ropts{clearedstatus_=Nothing}
+    toggleNotPending ropts = ropts{clearedstatus_=Just $ Not $ Status (Filter Pending)}
 
 -- | Toggle between showing all and showing only nonempty (more precisely, nonzero) items.
 toggleEmpty :: UIState -> UIState

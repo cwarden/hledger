@@ -25,6 +25,14 @@ toggleCleared ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=r
     toggleCleared ropts@ReportOpts{clearedstatus_=Just (Status Cleared)} = ropts{clearedstatus_=Nothing}
     toggleCleared ropts = ropts{clearedstatus_=Just (Status Cleared)}
 
+-- | Toggle between showing only uncleared items or all items.
+toggleUncleared :: UIState -> UIState
+toggleUncleared ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
+  ui{aopts=uopts{cliopts_=copts{reportopts_=toggleUncleared ropts}}}
+  where
+    toggleUncleared ropts@ReportOpts{clearedstatus_=Just (Not (Status Cleared))} = ropts{clearedstatus_=Nothing}
+    toggleUncleared ropts = ropts{clearedstatus_=Just (Not (Status Cleared))}
+
 -- | Toggle between showing only pending items or all items.
 togglePending :: UIState -> UIState
 togglePending ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
@@ -33,13 +41,29 @@ togglePending ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=r
     togglePending ropts@ReportOpts{clearedstatus_=Just (Status Pending)} = ropts{clearedstatus_=Nothing}
     togglePending ropts = ropts{clearedstatus_=Just (Status Pending)}
 
--- | Toggle between showing only uncleared items or all items.
-toggleUncleared :: UIState -> UIState
-toggleUncleared ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
-  ui{aopts=uopts{cliopts_=copts{reportopts_=toggleUncleared ropts}}}
+-- | Toggle between showing only non-pending items or all items.
+toggleNotPending :: UIState -> UIState
+toggleNotPending ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
+  ui{aopts=uopts{cliopts_=copts{reportopts_=toggleNotPending ropts}}}
   where
-    toggleUncleared ropts@ReportOpts{clearedstatus_=Just (Not (Status Cleared))} = ropts{clearedstatus_=Nothing}
-    toggleUncleared ropts = ropts{clearedstatus_=Just (Not (Status Cleared))}
+    toggleNotPending ropts@ReportOpts{clearedstatus_=Just (Not (Status Pending))} = ropts{clearedstatus_=Nothing}
+    toggleNotPending ropts = ropts{clearedstatus_=Just (Not (Status Pending))}
+
+-- | Toggle between showing only unmarked items or all items.
+toggleUnmarked :: UIState -> UIState
+toggleUnmarked ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
+  ui{aopts=uopts{cliopts_=copts{reportopts_=toggleUnmarked ropts}}}
+  where
+    toggleUnmarked ropts@ReportOpts{clearedstatus_=Just (Status Void)} = ropts{clearedstatus_=Nothing}
+    toggleUnmarked ropts = ropts{clearedstatus_=Just (Status Void)}
+
+-- | Toggle between showing only marked (pending or cleared) items or all items.
+toggleMarked :: UIState -> UIState
+toggleMarked ui@UIState{aopts=uopts@UIOpts{cliopts_=copts@CliOpts{reportopts_=ropts}}} =
+  ui{aopts=uopts{cliopts_=copts{reportopts_=toggleMarked ropts}}}
+  where
+    toggleMarked ropts@ReportOpts{clearedstatus_=Just (Not (Status Void))} = ropts{clearedstatus_=Nothing}
+    toggleMarked ropts = ropts{clearedstatus_=Just (Not (Status Void))}
 
 -- | Toggle between showing all and showing only nonempty (more precisely, nonzero) items.
 toggleEmpty :: UIState -> UIState
